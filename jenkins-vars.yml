@@ -1,7 +1,7 @@
 ---
 
 # jenkins variables
-project_name: docker-ci
+project_name: docker-xvfb
 external_type: os
 release_type: stable
 release_tag: alpine322
