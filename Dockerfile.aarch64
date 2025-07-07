@@ -35,7 +35,7 @@ RUN \
   rpmbuild -ba \
     /config/rpmbuild/SPECS/xorg-x11-server.spec && \
   rpm2cpio \
-    /config/rpmbuild/RPMS/x86_64/xorg-x11-server-Xvfb-21.*.x86_64.rpm \
+    /config/rpmbuild/RPMS/aarch64/xorg-x11-server-Xvfb-21.*.aarch64.rpm \
     | cpio -idmv && \
   mkdir -p /build-out/usr/bin && \
   mv usr/bin/Xvfb /build-out/usr/bin/
