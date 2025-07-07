@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-debian:kali AS builder
+FROM ghcr.io/linuxserver/baseimage-fedora:42 AS builder
 
 COPY /patches /patches
 ENV PATCH_VERSION=21 \
@@ -6,34 +6,39 @@ ENV PATCH_VERSION=21 \
 
 RUN \
   echo "**** build deps ****" && \
-  apt-get update && \
-  apt-get install -y \
-    devscripts \
-    dpkg-dev && \
-  apt-get build-dep -y \
-    xorg-server 
+  dnf install -y \
+    dnf-plugins-core \
+    rpm-build && \
+ dnf builddep -y \
+    xorg-x11-server
 
 RUN \
   echo "**** get and build xvfb ****" && \
-  apt-get source xorg-server && \
-  cd xorg-server-* && \
+  dnf download -y \
+    --source xorg-x11-server-Xvfb && \
+  rpm -ivh \
+    xorg-x11-server-*.src.rpm && \
+  cd /config/rpmbuild/SOURCES/ && \
+  VERSION=$(echo xorg-server-*.tar.xz \
+    | sed -e 's/^xorg-server-//' -e 's/\.tar\.xz$//') && \
+  tar -xf xorg-server-*.tar.xz && \
+  cd xorg-server-${VERSION} && \
   cp \
     /patches/${PATCH_VERSION}-xvfb-dri3.patch \
     patch.patch && \
   patch -p0 < patch.patch && \
-  awk ' \
-    { print } \
-    /include \/usr\/share\/dpkg\/architecture.mk/ { \
-      print ""; \
-      print "GLAMOR_DEP_LIBS := $(shell pkg-config --libs gbm epoxy libdrm)"; \
-      print "GLAMOR_DEP_CFLAGS := $(shell pkg-config --cflags gbm epoxy libdrm)"; \
-      print "export DEB_LDFLAGS_PREPEND ?= $(GLAMOR_DEP_LIBS)"; \
-      print "export DEB_CFLAGS_PREPEND ?= $(GLAMOR_DEP_CFLAGS)"; \
-    } \
-  ' debian/rules > debian/rules.tmp && mv debian/rules.tmp debian/rules && \
-  debuild -us -uc -b && \
+  cd .. && \
+  rm -f xorg-server-*.tar.xz && \
+  tar -cJf \
+    xorg-server-${VERSION}.tar.xz \
+    xorg-server-${VERSION} && \
+  rpmbuild -ba \
+    /config/rpmbuild/SPECS/xorg-x11-server.spec && \
+  rpm2cpio \
+    /config/rpmbuild/RPMS/x86_64/xorg-x11-server-Xvfb-21.*.x86_64.rpm \
+    | cpio -idmv && \
   mkdir -p /build-out/usr/bin && \
-  mv debian/xvfb/usr/bin/Xvfb /build-out/usr/bin/
+  mv usr/bin/Xvfb /build-out/usr/bin/
 
 
 # runtime stage
