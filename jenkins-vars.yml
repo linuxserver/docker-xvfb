@@ -4,8 +4,8 @@
 project_name: docker-xvfb
 external_type: os
 release_type: prerelease
-release_tag: ubuntunoble
-ls_branch: ubuntunoble
+release_tag: kali
+ls_branch: kali
 repo_vars:
   - BUILD_VERSION_ARG = 'OS'
   - LS_USER = 'linuxserver'

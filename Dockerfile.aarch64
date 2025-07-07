@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-ubuntu:arm64v8-noble AS builder
+FROM ghcr.io/linuxserver/baseimage-debian:arm64v8-kali AS builder
 
 COPY /patches /patches
 ENV PATCH_VERSION=21 \
