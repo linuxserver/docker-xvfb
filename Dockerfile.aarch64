@@ -1,45 +1,83 @@
-FROM ghcr.io/linuxserver/baseimage-fedora:arm64v8-42 AS builder
+FROM ghcr.io/linuxserver/baseimage-arch:latest AS builder
 
 COPY /patches /patches
 ENV PATCH_VERSION=21 \
-    HOME=/config
+    XORG_VERSION=21.1.18 \
+    HOME=/config 
 
 RUN \
   echo "**** build deps ****" && \
-  dnf install -y \
-    dnf-plugins-core \
-    rpm-build && \
- dnf builddep -y \
-    xorg-x11-server
+  pacman -Sy --noconfirm \
+    base-devel \
+    devtools \
+    git \
+    libepoxy \
+    libpciaccess \
+    libunwind \
+    libx11 \
+    libxaw \
+    libxcvt \
+    libxfont2 \
+    libxi \
+    libxkbfile \
+    libxmu \
+    libxrender \
+    libxres \
+    libxshmfence \
+    libxtst \
+    libxv \
+    mesa \
+    mesa-libgl \
+    meson \
+    patch \
+    pixman \
+    systemd \
+    xcb-util \
+    xcb-util-image \
+    xcb-util-keysyms \
+    xcb-util-renderutil \
+    xcb-util-wm \
+    xorg-font-util \
+    xorgproto \
+    xorg-util-macros \
+    xorg-xkbcomp \
+    xtrans 
 
 RUN \
-  echo "**** get and build xvfb ****" && \
-  dnf download -y \
-    --source xorg-x11-server-Xvfb && \
-  rpm -ivh \
-    xorg-x11-server-*.src.rpm && \
-  cd /config/rpmbuild/SOURCES/ && \
-  VERSION=$(echo xorg-server-*.tar.xz \
-    | sed -e 's/^xorg-server-//' -e 's/\.tar\.xz$//') && \
-  tar -xf xorg-server-*.tar.xz && \
-  cd xorg-server-${VERSION} && \
+  echo "**** get and build xorg ****" && \
+  curl -o \
+    /tmp/xorg.tar.gz -L \
+    "https://www.x.org/releases/individual/xserver/xorg-server-${XORG_VERSION}.tar.gz" && \
+  cd /tmp && \
+  tar xf xorg.tar.gz && \
+  cd xorg-* && \
   cp \
     /patches/${PATCH_VERSION}-xvfb-dri3.patch \
     patch.patch && \
   patch -p0 < patch.patch && \
-  cd .. && \
-  rm -f xorg-server-*.tar.xz && \
-  tar -cJf \
-    xorg-server-${VERSION}.tar.xz \
-    xorg-server-${VERSION} && \
-  rpmbuild -ba \
-    /config/rpmbuild/SPECS/xorg-x11-server.spec && \
-  rpm2cpio \
-    /config/rpmbuild/RPMS/aarch64/xorg-x11-server-Xvfb-21.*.aarch64.rpm \
-    | cpio -idmv && \
+  export CFLAGS=${CFLAGS/-fno-plt} && \
+  export CXXFLAGS=${CXXFLAGS/-fno-plt} && \
+  export LDFLAGS=${LDFLAGS/-Wl,-z,now} && \
+  arch-meson  build \
+    -D ipv6=true \
+    -D xvfb=true \
+    -D xnest=true \
+    -D xcsecurity=true \
+    -D xorg=true \
+    -D xephyr=true \
+    -D glamor=true \
+    -D udev=true \
+    -D dtrace=false \
+    -D systemd_logind=true \
+    -D suid_wrapper=true \
+    -D linux_acpi=false \
+    -D xkb_dir=/usr/share/X11/xkb \
+    -D xkb_output_dir=/var/lib/xkb \
+    -D libunwind=true && \
+  ninja -C build && \
+  ninja -C build install && \
   mkdir -p /build-out/usr/bin && \
-  mv usr/bin/Xvfb /build-out/usr/bin/
-
+  mv /usr/bin/Xvfb /build-out/usr/bin/
 
 # runtime stage
 FROM scratch

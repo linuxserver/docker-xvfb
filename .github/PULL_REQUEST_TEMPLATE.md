@@ -21,7 +21,7 @@
 
 ------------------------------
 
- - [ ] I have read the [contributing](https://github.com/linuxserver/docker-xvfb/blob/fedora42/.github/CONTRIBUTING.md) guideline and understand that I have made the correct modifications
+ - [ ] I have read the [contributing](https://github.com/linuxserver/docker-xvfb/blob/arch/.github/CONTRIBUTING.md) guideline and understand that I have made the correct modifications
 
 ------------------------------
 
