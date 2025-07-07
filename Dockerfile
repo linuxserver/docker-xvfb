@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-debian:bookworm AS builder
+FROM ghcr.io/linuxserver/baseimage-ubuntu:noble AS builder
 
 COPY /patches /patches
 ENV PATCH_VERSION=21 \
