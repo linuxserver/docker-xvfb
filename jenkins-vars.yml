@@ -4,8 +4,8 @@
 project_name: docker-xvfb
 external_type: os
 release_type: stable
-release_tag: alpine322
-ls_branch: master
+release_tag: debianbookworm
+ls_branch: debianbookworm
 repo_vars:
   - BUILD_VERSION_ARG = 'OS'
   - LS_USER = 'linuxserver'

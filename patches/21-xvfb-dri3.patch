@@ -1,7 +1,43 @@
-diff --git a/glamor/glamor_egl.c b/glamor/glamor_egl.c
+diff --git glamor/Makefile.am glamor/Makefile.am
+index aaf0aab..a7354c9 100644
+--- glamor/Makefile.am
++++ glamor/Makefile.am
+@@ -1,8 +1,13 @@
+-noinst_LTLIBRARIES = libglamor.la libglamor_egl_stubs.la
++noinst_LTLIBRARIES = libglamor.la libglamor_egl.la libglamor_egl_stubs.la
+ 
+ libglamor_la_LIBADD = $(GLAMOR_LIBS)
+ 
+-AM_CFLAGS = $(CWARNFLAGS) $(DIX_CFLAGS) $(GLAMOR_CFLAGS)
++AM_CFLAGS = \
++       -I$(top_srcdir)/dri3 \
++       $(CWARNFLAGS) \
++       $(DIX_CFLAGS) \
++       $(GLAMOR_CFLAGS) \
++       $(GBM_CFLAGS) $(DRM_CFLAGS) $(EPOXY_CFLAGS)
+ 
+ libglamor_la_SOURCES = \
+ 	glamor.c \
+@@ -54,6 +59,15 @@ libglamor_la_SOURCES += \
+ 	glamor_xv.c
+ endif
+ 
++libglamor_egl_la_SOURCES = \
++       glamor_egl.c
++
++libglamor_egl_la_LIBADD = \
++        $(GLAMOR_EGL_LIBS) \
++        $(GBM_LIBS) \
++        $(DRM_LIBS) \
++        $(EPOXY_LIBS)
++
+ libglamor_egl_stubs_la_SOURCES = \
+ 	glamor_egl_stubs.c \
+ 	glamor_egl_ext.h \
+diff --git glamor/glamor_egl.c glamor/glamor_egl.c
 index 6e0fc65..2c5c9c8 100644
---- a/glamor/glamor_egl.c
-+++ b/glamor/glamor_egl.c
+--- glamor/glamor_egl.c
++++ glamor/glamor_egl.c
 @@ -29,50 +29,67 @@
  
  #include "dix-config.h"
@@ -731,10 +767,10 @@ index 6e0fc65..2c5c9c8 100644
      return TRUE;
  
  error:
-diff --git a/glamor/glamor_egl.h b/glamor/glamor_egl.h
+diff --git glamor/glamor_egl.h glamor/glamor_egl.h
 index 8f6ed78..5edc016 100644
---- a/glamor/glamor_egl.h
-+++ b/glamor/glamor_egl.h
+--- glamor/glamor_egl.h
++++ glamor/glamor_egl.h
 @@ -27,6 +27,12 @@
  #ifndef GLAMOR_EGL_H
  #define GLAMOR_EGL_H
@@ -786,10 +822,10 @@ index 8f6ed78..5edc016 100644
 +                                             struct glamor_context *glamor_ctx);
 +
 +#endif /* GLAMOR_EGL_H */
-diff --git a/glamor/meson.build b/glamor/meson.build
+diff --git glamor/meson.build glamor/meson.build
 index 268af59..48d8d68 100644
---- a/glamor/meson.build
-+++ b/glamor/meson.build
+--- glamor/meson.build
++++ glamor/meson.build
 @@ -40,13 +40,20 @@ endif
  
  epoxy_dep = dependency('epoxy')
@@ -830,10 +866,10 @@ index 268af59..48d8d68 100644
  if build_xorg
      install_data('glamor.h', install_dir: xorgsdkdir)
  endif
-diff --git a/hw/vfb/InitOutput.c b/hw/vfb/InitOutput.c
+diff --git hw/vfb/InitOutput.c hw/vfb/InitOutput.c
 index 48efb61..5475c28 100644
---- a/hw/vfb/InitOutput.c
-+++ b/hw/vfb/InitOutput.c
+--- hw/vfb/InitOutput.c
++++ hw/vfb/InitOutput.c
 @@ -55,6 +55,7 @@ from The Open Group.
  #endif                          /* HAVE_MMAP */
  #include <sys/stat.h>
@@ -1021,10 +1057,48 @@ index 48efb61..5475c28 100644
      if (!vfbRandRInit(pScreen))
         return FALSE;
  
-diff --git a/hw/vfb/meson.build b/hw/vfb/meson.build
+diff --git hw/vfb/Makefile.am hw/vfb/Makefile.am
+index a4b4526..725ffca 100644
+--- hw/vfb/Makefile.am
++++ hw/vfb/Makefile.am
+@@ -3,7 +3,11 @@ SUBDIRS = man
+ bin_PROGRAMS = Xvfb
+ 
+ AM_CFLAGS = -DHAVE_DIX_CONFIG_H \
+-            $(XVFBMODULES_CFLAGS) \
++            $(GBM_CFLAGS) \
++            $(DRM_CFLAGS) \
++	    -I$(top_srcdir)/glamor \
++	    -DGLAMOR_HAS_GBM=1 \
++	    $(XVFBMODULES_CFLAGS) \
+ 	    $(DIX_CFLAGS)
+ 
+ SRCS =	InitInput.c \
+@@ -14,13 +18,17 @@ SRCS =	InitInput.c \
+ Xvfb_SOURCES = $(SRCS)
+ 
+ XVFB_LIBS = \
+-        @XVFB_LIBS@ \
++	$(top_builddir)/glamor/libglamor.la \
++	$(top_builddir)/glamor/libglamor_egl.la \
++	@XVFB_LIBS@ \
+ 	$(MAIN_LIB) \
+ 	$(XSERVER_LIBS) \
+ 	$(top_builddir)/Xi/libXistubs.la
+ 
+-Xvfb_LDADD = $(XVFB_LIBS) $(XVFB_SYS_LIBS) $(XSERVER_SYS_LIBS)
+-Xvfb_DEPENDENCIES = $(XVFB_LIBS)
++Xvfb_LDADD = $(XVFB_LIBS) $(XVFB_SYS_LIBS) $(XSERVER_SYS_LIBS) $(GBM_LIBS) $(DRM_LIBS) $(EPOXY_LIBS)
++Xvfb_DEPENDENCIES = \
++	$(top_builddir)/glamor/libglamor.la \
++	$(top_builddir)/glamor/libglamor_egl.la
+ Xvfb_LDFLAGS = $(LD_EXPORT_SYMBOLS_FLAG)
+ 
+ relink:
+diff --git hw/vfb/meson.build hw/vfb/meson.build
 index 7332866..de56e86 100644
---- a/hw/vfb/meson.build
-+++ b/hw/vfb/meson.build
+--- hw/vfb/meson.build
++++ hw/vfb/meson.build
 @@ -5,11 +5,18 @@ srcs = [
      '../../mi/miinitext.h',
  ]
