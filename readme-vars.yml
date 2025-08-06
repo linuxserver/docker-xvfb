@@ -2,6 +2,7 @@
 
 # project information
 project_name: xvfb
+project_categories: "Internal"
 full_custom_readme: |
   {% raw -%}
   # XVFB patched with DRI3/Glamor
