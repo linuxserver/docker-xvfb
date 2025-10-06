@@ -1,3 +1,14 @@
+diff --git a/glamor/glamor_render.c b/glamor/glamor_render.c
+--- a/glamor/glamor_render.c
++++ b/glamor/glamor_render.c
+@@ -1608,6 +1608,7 @@
+                  INT16 y_mask,
+                  INT16 x_dest, INT16 y_dest, CARD16 width, CARD16 height)
+ {
++    goto fail; 
+     ScreenPtr screen = dest->pDrawable->pScreen;
+     PixmapPtr dest_pixmap = glamor_get_drawable_pixmap(dest->pDrawable);
+     PixmapPtr source_pixmap = NULL, mask_pixmap = NULL;
 diff --git a/glamor/glamor_egl.c b/glamor/glamor_egl.c
 index 6e0fc65..2c5c9c8 100644
 --- a/glamor/glamor_egl.c
