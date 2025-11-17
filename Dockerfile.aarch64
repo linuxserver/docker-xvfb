@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-fedora:arm64v8-42 AS builder
+FROM ghcr.io/linuxserver/baseimage-fedora:arm64v8-43 AS builder
 
 COPY /patches /patches
 ENV PATCH_VERSION=21 \
@@ -26,7 +26,7 @@ RUN \
   cp \
     /patches/${PATCH_VERSION}-xvfb-dri3.patch \
     patch.patch && \
-  patch -p0 < patch.patch && \
+  patch -p1 < patch.patch && \
   cd .. && \
   rm -f xorg-server-*.tar.xz && \
   tar -cJf \

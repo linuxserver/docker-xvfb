@@ -4,8 +4,8 @@
 project_name: docker-xvfb
 external_type: os
 release_type: prerelease
-release_tag: fedora42
-ls_branch: fedora42
+release_tag: fedora43
+ls_branch: fedora43
 repo_vars:
   - BUILD_VERSION_ARG = 'OS'
   - LS_USER = 'linuxserver'
