@@ -1,2 +1,2 @@
 NAME             VERSION         TYPE   
-xorg-x11-server  21.1.18-1.fc42  rpm     
+xorg-x11-server  21.1.20-1.fc43  rpm     
