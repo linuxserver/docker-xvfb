@@ -27,7 +27,7 @@ RUN \
     /patches/${PATCH_VERSION}-xvfb-dri3.patch \
     patch.patch && \
   sed -i \
-    's|\.tar\.xz"|\.tar\.xz\npatch.patch"|' \
+    '/^source="/,/"/ s/missing-files.patch/&\n        patch.patch/' \
     APKBUILD && \
   sed -i \
     '/^sha512sums="/,/"$/{ s|\(  .*\.tar\.xz\)|\1\n'"$(sha512sum patch.patch)"'|; }' \
