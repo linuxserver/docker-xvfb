@@ -1,6 +1,5 @@
 FROM ghcr.io/linuxserver/baseimage-debian:arm64v8-kali AS builder
 
-COPY /patches /patches
 ENV PATCH_VERSION=21 \
     HOME=/config
 
@@ -13,6 +12,8 @@ RUN \
   apt-get build-dep -y \
     xorg-server 
 
+COPY /patches /patches
+
 RUN \
   echo "**** get and build xvfb ****" && \
   apt-get source xorg-server && \
@@ -20,14 +21,14 @@ RUN \
   cp \
     /patches/${PATCH_VERSION}-xvfb-dri3.patch \
     patch.patch && \
-  patch -p0 < patch.patch && \
+  patch -p1 < patch.patch && \
   awk ' \
     { print } \
     /include \/usr\/share\/dpkg\/architecture.mk/ { \
       print ""; \
       print "GLAMOR_DEP_LIBS := $(shell pkg-config --libs gbm epoxy libdrm)"; \
       print "GLAMOR_DEP_CFLAGS := $(shell pkg-config --cflags gbm epoxy libdrm)"; \
-      print "export DEB_LDFLAGS_PREPEND ?= $(GLAMOR_DEP_LIBS)"; \
+      print "export DEB_LDFLAGS_PREPEND ?= -Wl,--undefined=glamor_provider $(GLAMOR_DEP_LIBS)"; \
       print "export DEB_CFLAGS_PREPEND ?= $(GLAMOR_DEP_CFLAGS)"; \
     } \
   ' debian/rules > debian/rules.tmp && mv debian/rules.tmp debian/rules && \
