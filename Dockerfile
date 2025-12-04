@@ -2,7 +2,7 @@ FROM ghcr.io/linuxserver/baseimage-arch:latest AS builder
 
 COPY /patches /patches
 ENV PATCH_VERSION=21 \
-    XORG_VERSION=21.1.18 \
+    XORG_VERSION=21.1.20 \
     HOME=/config 
 
 RUN \
@@ -54,7 +54,7 @@ RUN \
   cp \
     /patches/${PATCH_VERSION}-xvfb-dri3.patch \
     patch.patch && \
-  patch -p0 < patch.patch && \
+  patch -p1 < patch.patch && \
   export CFLAGS=${CFLAGS/-fno-plt} && \
   export CXXFLAGS=${CXXFLAGS/-fno-plt} && \
   export LDFLAGS=${LDFLAGS/-Wl,-z,now} && \
