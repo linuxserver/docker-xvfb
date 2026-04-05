@@ -1,1 +1,2 @@
-No packages discovered
+NAME         VERSION             TYPE   
+xorg-server  2:21.1.21-1ubuntu1  deb     
